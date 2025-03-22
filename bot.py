@@ -11,7 +11,7 @@ genai.configure(api_key=GEMINI_API_KEY)
 intents = discord.Intents.default()
 intents.message_content = True
 
-bot = discord.Client(intents=intents)
+bot = commands.Bot(command_prefix="!", intents=intents)
 
 @bot.event
 async def on_ready():
@@ -39,6 +39,40 @@ async def on_message(message):
     except Exception as e:
         await message.channel.send(f"❌ Error: {e}")
         print(f"⚠️ Error: {e}")
+
+emoji_dict = {
+    "oni": "<:ONICHAN:1353066271989829795>",
+    "onichan": "<:ONICHAN:1353066271989829795>",
+    "spotify": "<:spotify:1353066234886885508>",
+    "hein": "<:hein:1353066175847727226>"
+}
+
+@bot.command()
+async def emoji(ctx, name: str):
+    emoji = emoji_dict.get(name.lower())  # Convert input to lowercase for flexibility
+    if emoji:
+        await ctx.send(f"{emoji}")
+    else:
+        await ctx.send("Emoji not found! 😢")
+
+
+@bot.event
+async def on_message(message):
+    if message.author == bot.user:
+        return
+
+    emoji_dict = {
+        "onichan": "<:ONICHAN:1353066271989829795>",
+        "music": "<:spotify:1353066234886885508>",
+        "hein": "<:hein:1353066175847727226>"
+    }
+
+    for word, emoji in emoji_dict.items():
+        if word in message.content.lower():
+            await message.add_reaction(emoji)
+
+    await bot.process_commands(message)
+
 
 
 
