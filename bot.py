@@ -33,31 +33,48 @@ async def on_ready():
 @bot.event
 async def on_message(message):
     if message.author == bot.user:
-        return
+        return  # Ignore bot's own messages
 
-    print(f"📩 Message received: {message.content}")
-
-    # 🔹 Auto React with Emojis
+    # Emoji reactions
+    emoji_dict = {
+        "onichan": "<:ONICHAN:1353066271989829795>",
+        "music": "<:spotify:1353066234886885508>",
+        "hein": "<:hein:1353066175847727226>"
+    }
     for word, emoji in emoji_dict.items():
         if word in message.content.lower():
             await message.add_reaction(emoji)
 
-    # 🔹 Generate Response from Gemini AI
+    # AI Response
     try:
+        print(f"📩 Received message: {message.content}")
         model = genai.GenerativeModel("gemini-1.5-pro-latest")
         response = model.generate_content(message.content)
 
-        reply = response.text[:2000] if hasattr(response, "text") else "⚠️ No valid response received."
+        if hasattr(response, "text"):
+            reply = response.text[:2000]  # Limit to 2000 characters
+        else:
+            reply = "⚠️ No valid response received."
 
         print(f"✅ Gemini Response: {reply[:100]}...")
         await message.channel.send(reply)
 
     except Exception as e:
-        await message.channel.send(f"❌ Error: {e}")
         print(f"⚠️ Error: {e}")
+        await message.channel.send(f"❌ Error: {e}")
 
-    # Ensure commands work
-    await bot.process_commands(message)
+    await bot.process_commands(message)  # Ensure other commands still work
+
+
+# Activity Status
+@bot.event
+async def on_ready():
+    print(f"✅ Logged in as {bot.user}")
+
+    activity = discord.Game("Playing with NOAH 🎮")
+    await bot.change_presence(status=discord.Status.online, activity=activity)
+
+
 
 # 🎭 Emoji Command
 @bot.command()
